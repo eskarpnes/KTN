@@ -10,7 +10,6 @@ from socket import *
 serverSocket = socket(AF_INET, SOCK_STREAM)
 
 # Prepare a server socket
-# FILL IN START
 
 # Assign a port number
 serverPort = 6789
@@ -22,8 +21,6 @@ serverSocket.bind(("", serverPort))
 # Listen to at most 1 connection at a time
 
 serverSocket.listen(1)
-
-# FILL IN END
 
 # Server should be up and running and listening to the incoming connections
 while True:
@@ -53,9 +50,7 @@ while True:
 
         # Send the HTTP response header line to the connection socket
         # Format: "HTTP/1.1 *code-for-successful-request*\r\n\r\n"
-        # FILL IN START
         connectionSocket.send(b"HTTP/1.1 200 OK\r\n\r\n")
-        # FILL IN END
 
         # Send the content of the requested file to the connection socket
         for i in range(0, len(outputdata)):
@@ -68,15 +63,11 @@ while True:
     except IOError:
         # Send HTTP response message for file not found
         # Same format as above, but with code for "Not Found"
-        # FILL IN START
         connectionSocket.send(b"HTTP/1.1 404 Not Found\r\n\r\n")
-        # FILL IN END
         connectionSocket.send(b"<html><head></head><body><h1>404 Not Found</h1></body></html>\r\n")
 
         # Close the client connection socket
-        # FILL IN START
         connectionSocket.close()
-        # FILL IN END
 
 serverSocket.close()
 
