@@ -10,7 +10,7 @@ def get_time_millis():
 # Get the server hostname and port as command line arguments
 host = input("Please enter the hostname: ")
 port = int(input("Please enter the port: "))
-timeout = 1  # in seconds
+timeoutTime = 1  # in seconds
 
 # Create UDP client socket
 # FILL IN START
@@ -19,7 +19,7 @@ clientSocket = socket(AF_INET, SOCK_DGRAM)
 # but the corresponding to UDP
 
 # Set socket timeout as 1 second
-clientSocket.settimeout(timeout)
+clientSocket.settimeout(timeoutTime)
 
 # FILL IN END
 
@@ -31,7 +31,7 @@ while ptime < 10:
     ptime += 1
     # Format the message to be sent as in the Lab description
 
-    sentTime = time()
+    sentTime = get_time_millis()
 
     data = "Ping " + str(ptime) + " " + str(sentTime)
 
@@ -41,7 +41,7 @@ while ptime < 10:
         # Receive the server response
         returned, server_address = clientSocket.recvfrom(1024)
         # Record the "received time"
-        receiveTime = time()
+        receiveTime = get_time_millis()
         # Display the server response as an output
         print(returned)
         # Round trip time is the difference between sent and received time

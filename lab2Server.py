@@ -25,7 +25,7 @@ while True:
     messageS = message.decode('utf-8').upper()
 
     # If rand is less is than 4, we consider the packet lost and do not respond
-    if rand < 0:
+    if rand < 4:
         continue
 
     # Otherwise, the server responds
