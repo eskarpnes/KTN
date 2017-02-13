@@ -11,7 +11,7 @@ serverSocket = socket(AF_INET, SOCK_DGRAM)
 # Assign IP address and port number to socket
 serverSocket.bind(("", 12000))
 
-print("Ready to receive Pings!!");
+print("Ready to receive Pings!!")
 
 while True:
     # Generate random number in the range of 0 to 10
@@ -25,7 +25,7 @@ while True:
     messageS = message.decode('utf-8').upper()
 
     # If rand is less is than 4, we consider the packet lost and do not respond
-    if rand < 4:
+    if rand < 0:
         continue
 
     # Otherwise, the server responds

@@ -1,22 +1,25 @@
 # This skeleton is valid for both Python 2.7 and Python 3.
 # You should be aware of your additional code for compatibility of the Python version of your choice.
 
-import time
+from time import *
 from socket import *
 
+def get_time_millis():
+    return round(time()*1000)
+
 # Get the server hostname and port as command line arguments
-host =  # FILL IN START		# FILL IN END
-port =  # FILL IN START		# FILL IN END
+host = input("Please enter the hostname: ")
+port = int(input("Please enter the port: "))
 timeout = 1  # in seconds
 
 # Create UDP client socket
 # FILL IN START
-
+clientSocket = socket(AF_INET, SOCK_DGRAM)
 # Note the second parameter is NOT SOCK_STREAM
 # but the corresponding to UDP
 
 # Set socket timeout as 1 second
-
+clientSocket.settimeout(timeout)
 
 # FILL IN END
 
@@ -27,31 +30,30 @@ ptime = 0
 while ptime < 10:
     ptime += 1
     # Format the message to be sent as in the Lab description
-    data =  # FILL IN START		# FILL IN END
+
+    sentTime = time()
+
+    data = "Ping " + str(ptime) + " " + str(sentTime)
 
     try:
-    # FILL IN START
-
-    # Record the "sent time"
-
-    # Send the UDP packet with the ping message
-
-    # Receive the server response
-
-    # Record the "received time"
-
-    # Display the server response as an output
-
-    # Round trip time is the difference between sent and received time
-
-
-    # FILL IN END
-    except:
+        # Send the UDP packet with the ping message
+        clientSocket.sendto(data.encode(), (host, port))
+        # Receive the server response
+        returned, server_address = clientSocket.recvfrom(1024)
+        # Record the "received time"
+        receiveTime = time()
+        # Display the server response as an output
+        print(returned)
+        # Round trip time is the difference between sent and received time
+        print("Sent: " + str(sentTime))
+        print("Received: " + str(receiveTime))
+        print("RTT: " + str(receiveTime-sentTime) + "ms")
+    except timeout:
         # Server does not response
         # Assume the packet is lost
         print("Request timed out.")
         continue
 
 # Close the client socket
-clientsocket.close()
+clientSocket.close()
 
