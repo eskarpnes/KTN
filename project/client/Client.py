@@ -10,7 +10,6 @@ class Client:
     This is the chat client class
     """
 
-
     def __init__(self, host, server_port):
         """
         This method is run when creating a new Client object
@@ -32,7 +31,7 @@ class Client:
             self.send_payload(request.split(" ", 1))
 
     def disconnect(self):
-        self.connection.close()
+        #self.connection.close()
         self.username = None
         print("Logout successful")
 
@@ -40,6 +39,9 @@ class Client:
         self.parser.parse(message)
 
     def send_payload(self, data):
+        if data[0].lower() in ["msg", "names", "logout"] and self.username is None:
+            print("You must log in first")
+            return None
         if data[0].lower() == "login" and self.username is not None:
             print("You are already logged in")
             return None

@@ -14,7 +14,7 @@ message_history = []
 
 def parse_payload(payload, handler):
     payload = json.loads(payload)
-    return requests[payload['request']](payload, handler)
+    return requests[payload['request'].lower()](payload, handler)
 
 
 def login(payload, handler):
@@ -25,17 +25,18 @@ def login(payload, handler):
         handler.username = username
         connected_users[username] = handler
         handler.send(send_info("Welcome " + username))
+        handler.send(send_history())
 
 
 def logout(payload, handler):
     connected_users.pop(handler.username)
     handler.send(send_info("Logout successful"))
-    handler.kill()
+    #handler.kill()
 
 def msg(payload, handler):
     content = payload["content"]
     message = {
-        "timestamp": str(datetime.datetime.utcnow()),
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": handler.username,
         "response": "message",
         "content": content
@@ -49,9 +50,9 @@ def msg(payload, handler):
 
 
 def names(payload, handler):
-    connected = "/n".join(list(connected_users.keys()))
+    connected = "\n".join(list(connected_users.keys()))
     message = {
-        "timestamp": str(datetime.datetime.utcnow()),
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": "server",
         "response": "names",
         "content": connected
@@ -60,13 +61,22 @@ def names(payload, handler):
     handler.send(payload.encode())
 
 
-def help():
-    pass
+def help(payload, handler):
+    content = "Available commands:\nlogin <username>  - log in with the given username \nlogout    - log out \nmsg" \
+              " <message>  - send message\nnames    - list users in chat \nhelp    - view help text"
+    message = {
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
+        "sender": "server",
+        "response": "info",
+        "content": content
+    }
+    payload = json.dumps(message)
+    handler.send(payload.encode())
 
 
 def send_info(content):
     message = {
-        "timestamp": str(datetime.datetime.utcnow()),
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": "server",
         "response": "info",
         "content": content
@@ -77,7 +87,7 @@ def send_info(content):
 
 def send_error(content):
     message = {
-        "timestamp": str(datetime.datetime.utcnow()),
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": "server",
         "response": "error",
         "content": content
@@ -85,13 +95,16 @@ def send_error(content):
     payload = json.dumps(message)
     return payload.encode()
 
+
 def send_history():
     message = {
-        "timestamp": str(datetime.datetime.utcnow()),
+        "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": "server",
         "response": "history",
         "content": message_history
     }
+    payload = json.dumps(message)
+    return payload.encode()
 
 requests = {
     "login": login,
@@ -100,6 +113,7 @@ requests = {
     "names": names,
     "help": help,
 }
+
 
 class ClientHandler(socketserver.BaseRequestHandler):
     """
