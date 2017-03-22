@@ -28,10 +28,15 @@ class Client:
     def run(self):
         while True:
             request = input()
+            if request == "quit":
+                self.disconnect()
             self.send_payload(request.split(" ", 1))
 
     def disconnect(self):
-        #self.connection.close()
+        self.connection.close()
+        quit()
+
+    def logout(self):
         self.username = None
         print("Logout successful")
 
@@ -39,20 +44,10 @@ class Client:
         self.parser.parse(message)
 
     def send_payload(self, data):
-        if data[0].lower() in ["msg", "names", "logout"] and self.username is None:
-            print("You must log in first")
-            return None
-        if data[0].lower() == "login" and self.username is not None:
-            print("You are already logged in")
-            return None
-        if data[0].lower() not in ["login", "logout", "msg", "names", "help"]:
-            print(data[0].lower() + " is not a valid argument")
-            return None
-        if data[0].lower() in ["login", "msg"]:
-            content = data[1]
-        else:
-            content = None
-        payload = json.dumps({"request": data[0], "content": content})
+        payload = json.dumps({
+                "request": data[0],
+                "content": data[1] if data[0] in ["msg", "login"] else None
+            })
         self.connection.send(payload.encode())
 
 
@@ -63,4 +58,4 @@ if __name__ == '__main__':
 
     No alterations are necessary
     """
-    client = Client('localhost', 9998)
+    client = Client('10.22.44.60', 9998)

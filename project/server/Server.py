@@ -2,6 +2,7 @@
 import socketserver
 import json
 import datetime
+import re
 
 """
 Variables and functions that must be used by all the ClientHandler objects
@@ -14,26 +15,43 @@ message_history = []
 
 def parse_payload(payload, handler):
     payload = json.loads(payload)
-    return requests[payload['request'].lower()](payload, handler)
+    if payload['request'].lower() in requests:
+        requests[payload['request'].lower()](payload, handler)
+    else:
+        handler.send(send_error("Not a valid request"))
 
 
 def login(payload, handler):
     username = payload["content"]
-    if username in connected_users.keys():
-        handler.send(send_error("The username is taken"))
+    if handler.username is None:
+        if not username.isalnum():
+            handler.send(send_error("Not a valid username"))
+            return
+        if username in connected_users.keys():
+            handler.send(send_error("The username is taken"))
+        else:
+            handler.username = username
+            connected_users[username] = handler
+            handler.send(send_info("Welcome " + username))
+            send_history(handler)
     else:
-        handler.username = username
-        connected_users[username] = handler
-        handler.send(send_info("Welcome " + username))
-        handler.send(send_history())
+        handler.send(send_error("You are already logged in"))
 
 
 def logout(payload, handler):
+    if handler.username is None:
+        handler.send(send_error("You must log in first"))
+        return
     connected_users.pop(handler.username)
+    handler.username = None
     handler.send(send_info("Logout successful"))
     #handler.kill()
 
+
 def msg(payload, handler):
+    if handler.username is None:
+        handler.send(send_error("You must log in first"))
+        return
     content = payload["content"]
     message = {
         "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
@@ -46,10 +64,13 @@ def msg(payload, handler):
     for user, handler in connected_users.items():
         handler.send(payload.encode())
 
-    return send_info("Message delivered")
+    handler.send(send_info("Message delivered"))
 
 
 def names(payload, handler):
+    if handler.username is None:
+        handler.send(send_error("You must log in first"))
+        return
     connected = "\n".join(list(connected_users.keys()))
     message = {
         "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
@@ -96,15 +117,25 @@ def send_error(content):
     return payload.encode()
 
 
-def send_history():
-    message = {
+def send_history(handler):
+    payload = {
         "timestamp": '{:%x - %X}'.format(datetime.datetime.now()),
         "sender": "server",
         "response": "history",
-        "content": message_history
+        "content": "This is the history of the chatroom"
     }
-    payload = json.dumps(message)
-    return payload.encode()
+    payload = json.dumps(payload)
+    handler.send(payload.encode())
+    for message in message_history:
+        payload = {
+            "timestamp": message["timestamp"],
+            "sender": message["sender"],
+            "response": "history",
+            "content": message["content"]
+        }
+        payload = json.dumps(payload)
+        handler.send(payload.encode())
+
 
 requests = {
     "login": login,
@@ -141,8 +172,10 @@ class ClientHandler(socketserver.BaseRequestHandler):
     def send(self, payload):
         self.connection.send(payload)
 
-    def kill(self):
+    def disconnect(self):
+        print("Killing thread")
         self.connection.close()
+
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """
@@ -160,7 +193,7 @@ if __name__ == "__main__":
 
     No alterations are necessary
     """
-    HOST, PORT = 'localhost', 9998
+    HOST, PORT = '10.22.44.60', 9998
     print('Server running...')
 
     # Set up and initiate the TCP server

@@ -25,3 +25,6 @@ class MessageReceiver(Thread):
         while True:
             received_string = self.connection.recv(4096)
             self.client.receive_message(received_string)
+
+    def kill(self):
+        self.connection.close()

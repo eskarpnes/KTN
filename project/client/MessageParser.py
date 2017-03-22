@@ -29,12 +29,12 @@ class MessageParser():
         print(message)
 
     def parse_info(self, payload):
-        if payload["content"] == "Logout successful":
-            self.client.disconnect()
-        if payload["content"][:7] == "Welcome":
-            self.client.username = payload["content"][8:]
-        if payload["content"][:9] == "Available":
-            self.parse_message(payload)
+        timestamp = payload["timestamp"]
+        message = payload["content"]
+        sender = payload["sender"]
+        print("Sender: " + sender + "   " + timestamp)
+        print(message)
+        print("")
 
     def parse_message(self, payload):
         timestamp = payload["timestamp"]
@@ -45,13 +45,7 @@ class MessageParser():
         print("")
 
     def parse_history(self, payload):
-        timestamp = payload["timestamp"]
-        messages = payload["content"]
-        sender = payload["sender"]
-        print("Sender: " + sender + "   " + timestamp)
-        print("The following is the chat history for this chatroom:")
-        for message in messages:
-            self.parse_message(json.loads(message))
+        self.parse_message(payload)
 
     def parse_names(self, payload):
         timestamp = payload["timestamp"]
