@@ -126,7 +126,10 @@ def send_history(handler):
     }
     payload = json.dumps(payload)
     handler.send(payload.encode())
+    print(message_history)
     for message in message_history:
+        message = json.loads(message)
+        print(message)
         payload = {
             "timestamp": message["timestamp"],
             "sender": message["sender"],
@@ -193,7 +196,7 @@ if __name__ == "__main__":
 
     No alterations are necessary
     """
-    HOST, PORT = '10.22.44.60', 9998
+    HOST, PORT = 'localhost', 9998
     print('Server running...')
 
     # Set up and initiate the TCP server
